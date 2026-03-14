@@ -1,0 +1,26 @@
+# IDE files
+.idea/
+*.iml
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+
+# Exclude any generated plan files
+*.tfplan
+plan_output.txt
+plan_output_fixed.txt
+.output.txt
+
+# Service account key JSON files
+*.json
+
+# User-specific configuration
+.terraformrc
+terraform.rc
