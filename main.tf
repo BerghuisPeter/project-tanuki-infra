@@ -26,11 +26,11 @@ locals {
 
 module "angular_frontend" {
   source          = "./modules/cloud_run"
-  service_name    = "${var.angular_image_name}-${var.environment}"
+  service_name    = "${var.angular_image_name}"
   region          = var.region
-  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.angular_gar_repo}/${var.angular_image_name}:${var.environment}"
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.angular_gar_repo}/${var.angular_image_name}:latest"
   service_account = var.cloud_run_service_account
-  domain_name     = var.front_url
+  domain_name     = replace(var.front_url, "https://", "")
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
     { name = "AUTH_API_URL", value = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url },
@@ -41,9 +41,9 @@ module "angular_frontend" {
 
 module "socket_server" {
   source          = "./modules/cloud_run"
-  service_name    = "${var.socket_image_name}-${var.environment}"
+  service_name    = "${var.socket_image_name}"
   region          = var.region
-  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.socket_gar_repo}/${var.socket_image_name}:${var.environment}"
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.socket_gar_repo}/${var.socket_image_name}:latest"
   service_account = var.cloud_run_service_account
   domain_name     = var.socket_domain
   env_vars = [
@@ -54,7 +54,7 @@ module "socket_server" {
 
 module "auth_service" {
   source          = "./modules/cloud_run"
-  service_name    = "tanuki-back-auth-service-${var.environment}"
+  service_name    = "tanuki-back-auth-service"
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
   service_account = var.cloud_run_service_account
@@ -69,7 +69,7 @@ module "auth_service" {
 
 module "profile_service" {
   source          = "./modules/cloud_run"
-  service_name    = "tanuki-back-profile-service-${var.environment}"
+  service_name    = "tanuki-back-profile-service"
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/profile-service:latest"
   service_account = var.cloud_run_service_account
