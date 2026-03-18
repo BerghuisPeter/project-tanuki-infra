@@ -17,6 +17,12 @@ resource "google_project_iam_member" "runtime_monitoring" {
   member  = "serviceAccount:${google_service_account.cloudrun_runtime.email}"
 }
 
+resource "google_project_iam_member" "runtime_secret_accessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.cloudrun_runtime.email}"
+}
+
 # The Terraform Management Service Account is usually created once manually 
 # to 'bootstrap' the project, but we can also define it here to manage its 
 # permissions and ensure it exists.
@@ -36,7 +42,8 @@ locals {
     "roles/artifactregistry.repoAdmin",
     "roles/iam.serviceAccountUser",
     "roles/iam.securityAdmin",
-    "roles/storage.admin"
+    "roles/storage.admin",
+    "roles/secretmanager.admin"
   ]
 }
 

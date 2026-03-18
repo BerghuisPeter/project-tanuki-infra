@@ -3,29 +3,24 @@ locals {
   # Dynamically construct the CORS allowed origins
   # We include the custom frontend domains if provided, AND the GRC generated URL.
   # We also include any additional origins from var.app_cors_allowed_origins.
-  all_cors_origins = compact(distinct(concat(
-    split(";", var.app_cors_allowed_origins),
-    [
-      var.frontend_url
-    ]
-  )))
+  all_cors_origins = split(";", var.app_cors_allowed_origins)
 
   # Join the origins with a semicolon (;) as requested
   dynamic_cors_list = join(";", distinct(local.all_cors_origins))
 
-  common_env = [
+  common_back_env = [
     { name = "SPRING_PROFILES_ACTIVE", value = var.environment },
     { name = "SPRING_DATASOURCE_USERNAME", value = var.db_username },
     { name = "JWT_EXPIRATION", value = var.jwt_expiration },
     { name = "JWT_REFRESH_EXPIRATION", value = var.jwt_refresh_expiration },
-    { name = "GOOGLE_REDIRECT_URI", value = var.google_redirect_uri },
-    { name = "FRONTEND_URL", value = var.frontend_url },
     { name = "APP_CORS_ALLOWED_ORIGINS", value = local.dynamic_cors_list },
-    # Sensitive variables passed as standard env vars to avoid Secret Manager costs
-    { name = "SPRING_DATASOURCE_URL", value = var.db_url },
-    { name = "SPRING_DATASOURCE_PASSWORD", value = var.db_password },
-    { name = "JWT_SECRET", value = var.jwt_secret },
-    { name = "GOOGLE_CLIENT_SECRET", value = var.google_client_secret }
+  ]
+
+  common_secret_env = [
+    { name = "SPRING_DATASOURCE_URL", secret = "db_url", version = "latest" },
+    { name = "SPRING_DATASOURCE_PASSWORD", secret = "db_password", version = "latest" },
+    { name = "JWT_SECRET", secret = "jwt_secret", version = "latest" },
+    { name = "GOOGLE_CLIENT_SECRET", secret = "google_client_secret", version = "latest" }
   ]
 }
 
@@ -35,7 +30,7 @@ module "angular_frontend" {
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.angular_gar_repo}/${var.angular_image_name}:${var.environment}"
   service_account = var.cloud_run_service_account
-  domain_name     = var.google_redirect_uri
+  domain_name     = var.front_url
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
     { name = "AUTH_API_URL", value = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url },
@@ -64,7 +59,12 @@ module "auth_service" {
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
   service_account = var.cloud_run_service_account
   domain_name     = var.auth_domain
-  env_vars        = local.common_env
+  env_vars        = concat(local.common_back_env, [
+    { name = "GOOGLE_CLIENT_ID", value = var.google_client_id },
+    { name = "GOOGLE_REDIRECT_URI", value = var.google_redirect_uri },
+    { name = "FRONT_URL", value = var.front_url }
+  ])
+  secret_env_vars = local.common_secret_env
 }
 
 module "profile_service" {
@@ -74,5 +74,6 @@ module "profile_service" {
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/profile-service:latest"
   service_account = var.cloud_run_service_account
   domain_name     = var.profile_domain
-  env_vars        = local.common_env
+  env_vars        = local.common_back_env
+  secret_env_vars = local.common_secret_env
 }

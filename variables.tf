@@ -27,10 +27,12 @@ variable "gar_repository" {
 }
 
 # CockroachDB Configuration
+# DEPRECATED: Values moved to Secret Manager (secret_id: db_url)
 variable "db_url" {
   description = "CockroachDB connection URL"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "db_username" {
@@ -38,17 +40,21 @@ variable "db_username" {
   type        = string
 }
 
+# DEPRECATED: Values moved to Secret Manager (secret_id: db_password)
 variable "db_password" {
   description = "CockroachDB password"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 # Security variables
+# DEPRECATED: Values moved to Secret Manager (secret_id: jwt_secret)
 variable "jwt_secret" {
   description = "JWT Secret"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "jwt_expiration" {
@@ -61,10 +67,17 @@ variable "jwt_refresh_expiration" {
   type        = string
 }
 
+variable "google_client_id" {
+  description = "Google OAuth2 client ID"
+  type        = string
+}
+
+# DEPRECATED: Values moved to Secret Manager (secret_id: google_client_secret)
 variable "google_client_secret" {
   description = "Google OAuth2 client secret"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "google_redirect_uri" {
@@ -120,4 +133,9 @@ variable "cloud_run_service_account" {
   description = "The service account to run the Cloud Run services as"
   type        = string
   default     = null
+}
+
+variable "front_url" {
+  description = "url for the tanuki front-end"
+  type = string
 }

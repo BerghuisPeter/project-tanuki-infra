@@ -18,6 +18,15 @@ variable "env_vars" {
   default = []
 }
 
+variable "secret_env_vars" {
+  type = list(object({
+    name       = string
+    secret     = string
+    version    = string
+  }))
+  default = []
+}
+
 variable "service_account" {
   description = "The service account to run the Cloud Run service as"
   type        = string
@@ -45,6 +54,19 @@ resource "google_cloud_run_v2_service" "default" {
         content {
           name  = env.value.name
           value = env.value.value
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.secret_env_vars
+        content {
+          name = env.value.name
+          value_source {
+            secret_key_ref {
+              secret  = env.value.secret
+              version = env.value.version
+            }
+          }
         }
       }
     }
