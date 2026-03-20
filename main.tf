@@ -29,7 +29,7 @@ module "angular_frontend" {
   service_name    = var.angular_image_name
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.angular_gar_repo}/${var.angular_image_name}:latest"
-  service_account = var.cloud_run_service_account
+  service_account = google_service_account.cloudrun_runtime.email
   domain_name     = replace(var.front_url, "https://", "")
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
@@ -44,7 +44,7 @@ module "socket_server" {
   service_name    = var.socket_image_name
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.socket_gar_repo}/${var.socket_image_name}:latest"
-  service_account = var.cloud_run_service_account
+  service_account = google_service_account.cloudrun_runtime.email
   domain_name     = var.socket_domain
   env_vars = [
     { name = "NODE_ENV", value = var.environment == "dev" ? "development" : "production" },
@@ -57,7 +57,7 @@ module "auth_service" {
   service_name    = "tanuki-back-auth-service"
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
-  service_account = var.cloud_run_service_account
+  service_account = google_service_account.cloudrun_runtime.email
   domain_name     = var.auth_domain
   env_vars = concat(local.common_back_env, [
     { name = "GOOGLE_CLIENT_ID", value = var.google_client_id },
@@ -72,7 +72,7 @@ module "profile_service" {
   service_name    = "tanuki-back-profile-service"
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/profile-service:latest"
-  service_account = var.cloud_run_service_account
+  service_account = google_service_account.cloudrun_runtime.email
   domain_name     = var.profile_domain
   env_vars        = local.common_back_env
   secret_env_vars = local.common_secret_env

@@ -2,7 +2,6 @@ project_id                = "tanuki-prod-489811"
 region                    = "asia-northeast1"
 environment               = "prod"
 gar_location              = "asia-northeast1"
-cloud_run_service_account = "tanuki-cloudrun-runtime@tanuki-prod-project.iam.gserviceaccount.com"
 
 #CORS
 app_cors_allowed_origins = "https://project-tanuki.net;https://www.project-tanuki.net"
