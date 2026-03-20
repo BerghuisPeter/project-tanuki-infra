@@ -16,13 +16,13 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    environment: ${{ (github.event_name == 'push' || github.event_name == 'pull_request') && github.base_ref == 'master' || github.ref == 'refs/heads/master' && 'production' || 'development' }}
+    environment: ${{ (github.event_name == 'pull_request' && github.base_ref == 'master') && 'prod' || (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
     
     # Map the environment based on the branch/event
-    # PRs to master = production environment (to test)
-    # Push to master = production environment (to deploy)
+    # PRs to master = prod environment (to test)
+    # Push to master = prod environment (to deploy)
     env:
-      ENV_NAME: ${{ (github.event_name == 'push' || github.event_name == 'pull_request') && (github.base_ref == 'master' || github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
+      ENV_NAME: ${{ (github.event_name == 'pull_request' && github.base_ref == 'master') && 'prod' || (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
 
     steps:
       - name: Checkout
