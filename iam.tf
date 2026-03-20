@@ -53,3 +53,33 @@ resource "google_project_iam_member" "terraform_mgmt_roles" {
   role     = each.value
   member   = "serviceAccount:${google_service_account.terraform_mgmt.email}"
 }
+
+# Service account for Application (Back-end) CI/CD
+# This account is used by the application repositories to build/push images 
+# and potentially trigger a Cloud Run revision update.
+resource "google_service_account" "app_cicd" {
+  account_id   = "tanuki-app-cicd"
+  display_name = "Tanuki Application CI/CD"
+}
+
+# Roles for the App CI/CD Service Account
+# 1. Allow it to push images to Artifact Registry
+resource "google_project_iam_member" "app_cicd_gar_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.app_cicd.email}"
+}
+
+# 2. Allow it to create new Cloud Run revisions (with NO config changes)
+resource "google_project_iam_member" "app_cicd_run_developer" {
+  project = var.project_id
+  role    = "roles/run.developer"
+  member  = "serviceAccount:${google_service_account.app_cicd.email}"
+}
+
+# 3. Allow it to use the runtime service account when creating revisions
+resource "google_service_account_iam_member" "app_cicd_act_as" {
+  service_account_id = google_service_account.cloudrun_runtime.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.app_cicd.email}"
+}
