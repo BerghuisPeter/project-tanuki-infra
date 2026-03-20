@@ -1,0 +1,86 @@
+name: 'Terraform CI/CD'
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: ${{ (github.event_name == 'pull_request' && github.base_ref == 'master') && 'prod' || (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
+    
+    # Map the environment based on the branch/event
+    # PRs to master = prod environment (to test)
+    # Push to master = prod environment (to deploy)
+    env:
+      ENV_NAME: ${{ (github.event_name == 'pull_request' && github.base_ref == 'master') && 'prod' || (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend-config="environments/${{ env.ENV_NAME }}-backend.conf" -reconfigure
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -var-file="environments/${{ env.ENV_NAME }}.tfvars"
+        continue-on-error: true
+
+      - name: Update Pull Request
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            
+            <details><summary>Show Plan</summary>
+            
+            \`\`\`hcl
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\`
+            
+            </details>
+            
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: terraform apply -auto-approve -var-file="environments/${{ env.ENV_NAME }}.tfvars"

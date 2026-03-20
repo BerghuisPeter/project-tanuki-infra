@@ -234,3 +234,7 @@ This setup is optimized for cost by avoiding paid services like **Google Secret 
 ## Next Steps
 
 - **CI/CD Integration**: Update your GitHub Actions to run `terraform plan` on PRs and `terraform apply` on merges.
+  - A CI/CD pipeline is already configured in `.github/workflows/terraform.yml`.
+  - To use it, you must set the following **GitHub Secrets** in your repository:
+    - `GCP_SA_KEY`: The JSON key of your `terraform-mgmt` service account.
+    - `DB_PASSWORD`, `JWT_SECRET`, etc.: Any other sensitive variables required by your Terraform configuration.

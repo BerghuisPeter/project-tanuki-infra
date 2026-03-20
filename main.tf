@@ -26,7 +26,7 @@ locals {
 
 module "angular_frontend" {
   source          = "./modules/cloud_run"
-  service_name    = "${var.angular_image_name}"
+  service_name    = var.angular_image_name
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.angular_gar_repo}/${var.angular_image_name}:latest"
   service_account = var.cloud_run_service_account
@@ -41,7 +41,7 @@ module "angular_frontend" {
 
 module "socket_server" {
   source          = "./modules/cloud_run"
-  service_name    = "${var.socket_image_name}"
+  service_name    = var.socket_image_name
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.socket_gar_repo}/${var.socket_image_name}:latest"
   service_account = var.cloud_run_service_account
@@ -59,7 +59,7 @@ module "auth_service" {
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
   service_account = var.cloud_run_service_account
   domain_name     = var.auth_domain
-  env_vars        = concat(local.common_back_env, [
+  env_vars = concat(local.common_back_env, [
     { name = "GOOGLE_CLIENT_ID", value = var.google_client_id },
     { name = "GOOGLE_REDIRECT_URI", value = var.google_redirect_uri },
     { name = "FRONT_URL", value = var.front_url }
