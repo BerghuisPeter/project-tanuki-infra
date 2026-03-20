@@ -129,11 +129,6 @@ variable "profile_domain" {
   default     = null
 }
 
-variable "cloud_run_service_account" {
-  description = "The service account to run the Cloud Run services as"
-  type        = string
-  default     = null
-}
 
 variable "front_url" {
   description = "url for the tanuki front-end"
