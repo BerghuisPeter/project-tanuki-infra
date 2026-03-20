@@ -23,11 +23,16 @@ jobs:
     # Push to master = prod environment (to deploy)
     env:
       ENV_NAME: ${{ github.event_name == 'push' && 'prod' || 'dev' }}
-      GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
