@@ -20,9 +20,9 @@ variable "env_vars" {
 
 variable "secret_env_vars" {
   type = list(object({
-    name       = string
-    secret     = string
-    version    = string
+    name    = string
+    secret  = string
+    version = string
   }))
   default = []
 }

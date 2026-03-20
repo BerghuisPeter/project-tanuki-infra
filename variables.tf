@@ -137,5 +137,5 @@ variable "cloud_run_service_account" {
 
 variable "front_url" {
   description = "url for the tanuki front-end"
-  type = string
+  type        = string
 }
