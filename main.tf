@@ -33,9 +33,9 @@ module "angular_frontend" {
   domain_name     = replace(var.front_url, "https://", "")
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
-    { name = "AUTH_API_URL", value = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url },
-    { name = "PROFILE_API_URL", value = var.profile_domain != null && var.profile_domain != "" ? "https://${var.profile_domain}" : module.profile_service.service_url },
-    { name = "SOCKET_SERVER_URL", value = var.socket_domain != null && var.socket_domain != "" ? "https://${var.socket_domain}" : module.socket_server.service_url },
+    { name = "NG_APP_AUTH_API_URL", value = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url },
+    { name = "NG_APP_PROFILE_API_URL", value = var.profile_domain != null && var.profile_domain != "" ? "https://${var.profile_domain}" : module.profile_service.service_url },
+    { name = "NG_APP_SOCKET_SERVER_URL", value = var.socket_domain != null && var.socket_domain != "" ? "https://${var.socket_domain}" : module.socket_server.service_url },
   ]
 }
 
