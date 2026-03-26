@@ -13,7 +13,7 @@ jwt_expiration         = "3600000"
 jwt_refresh_expiration = "86400000"
 
 google_client_id    = "583627204016-5o809inoo1hs877478cqtthd15h0a3hn.apps.googleusercontent.com"
-google_redirect_uri = "https://dev.project-tanuki.net/"
+google_redirect_uri = "/login/oauth2/code/google"
 
 # front
 angular_gar_repo   = "tanuki-angular-repo"
