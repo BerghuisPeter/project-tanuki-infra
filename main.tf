@@ -8,6 +8,10 @@ locals {
   # Join the origins with a semicolon (;) as requested
   dynamic_cors_list = join(";", distinct(local.all_cors_origins))
 
+  # Auth Service URL (used by other services)
+  # If a custom domain is provided, we use it; otherwise, we fall back to the Cloud Run generated URL.
+  auth_service_url = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url
+
   common_back_env = [
     { name = "SPRING_PROFILES_ACTIVE", value = var.environment },
     { name = "SPRING_DATASOURCE_USERNAME", value = var.db_username },
@@ -33,7 +37,7 @@ module "angular_frontend" {
   domain_name     = replace(var.front_url, "https://", "")
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
-    { name = "NG_APP_AUTH_API_URL", value = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url },
+    { name = "NG_APP_AUTH_API_URL", value = local.auth_service_url },
     { name = "NG_APP_PROFILE_API_URL", value = var.profile_domain != null && var.profile_domain != "" ? "https://${var.profile_domain}" : module.profile_service.service_url },
     { name = "NG_APP_SOCKET_SERVER_URL", value = var.socket_domain != null && var.socket_domain != "" ? "https://${var.socket_domain}" : module.socket_server.service_url },
   ]
@@ -61,7 +65,7 @@ module "auth_service" {
   domain_name     = var.auth_domain
   env_vars = concat(local.common_back_env, [
     { name = "GOOGLE_CLIENT_ID", value = var.google_client_id },
-    { name = "GOOGLE_REDIRECT_URI", value = var.auth_domain + var.google_redirect_uri },
+    { name = "GOOGLE_REDIRECT_URI", value = "${var.auth_domain}${var.google_redirect_uri}" },
     { name = "FRONT_URL", value = var.front_url }
   ])
   secret_env_vars = local.common_secret_env
