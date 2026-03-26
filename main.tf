@@ -65,7 +65,7 @@ module "auth_service" {
   domain_name     = var.auth_domain
   env_vars = concat(local.common_back_env, [
     { name = "GOOGLE_CLIENT_ID", value = var.google_client_id },
-    { name = "GOOGLE_REDIRECT_URI", value = "${var.auth_domain}${var.google_redirect_uri}" },
+    { name = "GOOGLE_REDIRECT_URI", value = var.google_redirect_uri },
     { name = "FRONT_URL", value = var.front_url }
   ])
   secret_env_vars = local.common_secret_env
