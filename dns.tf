@@ -6,6 +6,10 @@ resource "google_dns_managed_zone" "main" {
   dns_name    = "project-tanuki.net." # trailing dot is required
   description = "Main DNS zone for project-tanuki.net"
   project     = var.project_id
+
+  # Ensure IAM roles are applied before creating the DNS zone
+  # This avoids 403 errors due to IAM propagation lag.
+  depends_on = [google_project_iam_member.terraform_mgmt_roles]
 }
 
 # -----------------------------------------------

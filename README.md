@@ -54,7 +54,8 @@ Google Cloud Run requires you to prove ownership of any domain you wish to map t
 1.  Go to the [Google Search Console (Webmaster Central)](https://www.google.com/webmasters/verification/home).
 2.  Add a **Domain property** for `project-tanuki.net`.
 3.  Follow the verification steps (usually adding a TXT record to your current DNS provider, e.g., Squarespace).
-4.  **Important**: You must verify the domain *before* Terraform can successfully create the `google_cloud_run_domain_mapping` resources.
+4.  **Crucial Step**: Once verified, you must also add the **Terraform Management** service account (`terraform-mgmt@tanuki-dev.iam.gserviceaccount.com` or similar) as a **Verified Owner** in the Search Console settings for that domain.
+5.  **Important**: You must verify the domain and add the service account as an owner *before* Terraform can successfully create the `google_cloud_run_domain_mapping` resources.
 
 **Command:**
 ```bash
