@@ -39,6 +39,23 @@ To deploy this project to a brand-new Google Cloud project, you must follow this
 ### 1. The Bootstrap (Day 0)
 Initially, you must run Terraform using your own identity (your Google account) which has **Project Owner** permissions.
 
+**Pre-requisite: Enable Required APIs**
+Before running Terraform, you must manually enable the following APIs in your GCP project:
+- **Cloud DNS API** (`dns.googleapis.com`): Required for managing DNS zones and records.
+- **Cloud Run Admin API** (`run.googleapis.com`): Required for service deployments and domain mappings.
+
+You can enable them via the GCP Console or by running:
+```bash
+gcloud services enable dns.googleapis.com run.googleapis.com
+```
+
+**Pre-requisite: Domain Ownership Verification**
+Google Cloud Run requires you to prove ownership of any domain you wish to map to a service.
+1.  Go to the [Google Search Console (Webmaster Central)](https://www.google.com/webmasters/verification/home).
+2.  Add a **Domain property** for `project-tanuki.net`.
+3.  Follow the verification steps (usually adding a TXT record to your current DNS provider, e.g., Squarespace).
+4.  **Important**: You must verify the domain *before* Terraform can successfully create the `google_cloud_run_domain_mapping` resources.
+
 **Command:**
 ```bash
 terraform apply \
