@@ -8,9 +8,20 @@ locals {
   # Join the origins with a semicolon (;) as requested
   dynamic_cors_list = join(";", distinct(local.all_cors_origins))
 
-  # Auth Service URL (used by other services)
-  # If a custom domain is provided, we use it; otherwise, we fall back to the Cloud Run generated URL.
-  auth_service_url = var.auth_domain != null && var.auth_domain != "" ? "https://${var.auth_domain}" : module.auth_service.service_url
+  # Domain Logic
+  base_domain = "project-tanuki.net"
+  # dev: dev.auth.project-tanuki.net
+  # prod: auth.project-tanuki.net
+  service_domain_suffix = var.environment == "dev" ? "dev." : ""
+
+  auth_domain    = "${local.service_domain_suffix}auth.${local.base_domain}"
+  profile_domain = "${local.service_domain_suffix}profile.${local.base_domain}"
+  socket_domain  = "${local.service_domain_suffix}socket.${local.base_domain}"
+  # For the frontend, it's dev.project-tanuki.net or project-tanuki.net (already handled via var.front_url in tfvars?)
+  # Let's keep using var.front_url but update it in tfvars or use a local if it's simpler.
+  # Based on tfvars:
+  # dev: front_url = "https://dev.project-tanuki.net"
+  # prod: front_url = "https://project-tanuki.net"
 
   common_back_env = [
     { name = "SPRING_PROFILES_ACTIVE", value = var.environment },
@@ -37,9 +48,9 @@ module "angular_frontend" {
   domain_name     = replace(var.front_url, "https://", "")
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
-    { name = "NG_APP_AUTH_API_URL", value = local.auth_service_url },
-    { name = "NG_APP_PROFILE_API_URL", value = var.profile_domain != null && var.profile_domain != "" ? "https://${var.profile_domain}" : module.profile_service.service_url },
-    { name = "NG_APP_SOCKET_SERVER_URL", value = var.socket_domain != null && var.socket_domain != "" ? "https://${var.socket_domain}" : module.socket_server.service_url },
+    { name = "NG_APP_AUTH_API_URL", value = "https://${local.auth_domain}" },
+    { name = "NG_APP_PROFILE_API_URL", value = "https://${local.profile_domain}" },
+    { name = "NG_APP_SOCKET_SERVER_URL", value = "https://${local.socket_domain}" },
   ]
 }
 
@@ -49,7 +60,7 @@ module "socket_server" {
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.socket_gar_repo}/${var.socket_image_name}:latest"
   service_account = google_service_account.cloudrun_runtime.email
-  domain_name     = var.socket_domain
+  domain_name     = local.socket_domain
   env_vars = [
     { name = "NODE_ENV", value = var.environment == "dev" ? "development" : "production" },
     { name = "CORS_DOMAIN", value = local.dynamic_cors_list }
@@ -62,7 +73,7 @@ module "auth_service" {
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
   service_account = google_service_account.cloudrun_runtime.email
-  domain_name     = var.auth_domain
+  domain_name     = local.auth_domain
   env_vars = concat(local.common_back_env, [
     { name = "GOOGLE_CLIENT_ID", value = var.google_client_id },
     { name = "GOOGLE_REDIRECT_URI", value = var.google_redirect_uri },
@@ -77,7 +88,7 @@ module "profile_service" {
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/profile-service:latest"
   service_account = google_service_account.cloudrun_runtime.email
-  domain_name     = var.profile_domain
+  domain_name     = local.profile_domain
   env_vars        = local.common_back_env
   secret_env_vars = local.common_secret_env
 }
