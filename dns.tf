@@ -3,7 +3,7 @@
 # -----------------------------------------------
 resource "google_dns_managed_zone" "main" {
   name        = "project-tanuki-zone"
-  dns_name    = "project-tanuki.net."   # trailing dot is required
+  dns_name    = "project-tanuki.net." # trailing dot is required
   description = "Main DNS zone for project-tanuki.net"
   project     = var.project_id
 }
