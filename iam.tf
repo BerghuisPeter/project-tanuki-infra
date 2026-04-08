@@ -75,4 +75,3 @@ resource "google_project_iam_member" "terraform_mgmt_roles" {
   role     = each.value
   member   = "serviceAccount:${google_service_account.terraform_mgmt.email}"
 }
-
