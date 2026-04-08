@@ -14,14 +14,10 @@ locals {
   # prod: auth.project-tanuki.net
   service_domain_suffix = var.environment == "dev" ? "dev." : ""
 
+  front_domain   = "${local.service_domain_suffix}${local.base_domain}"
   auth_domain    = "${local.service_domain_suffix}auth.${local.base_domain}"
   profile_domain = "${local.service_domain_suffix}profile.${local.base_domain}"
   socket_domain  = "${local.service_domain_suffix}socket.${local.base_domain}"
-  # For the frontend, it's dev.project-tanuki.net or project-tanuki.net (already handled via var.front_url in tfvars?)
-  # Let's keep using var.front_url but update it in tfvars or use a local if it's simpler.
-  # Based on tfvars:
-  # dev: front_url = "https://dev.project-tanuki.net"
-  # prod: front_url = "https://project-tanuki.net"
 
   common_back_env = [
     { name = "SPRING_PROFILES_ACTIVE", value = var.environment },
@@ -45,7 +41,7 @@ module "angular_frontend" {
   region          = var.region
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.angular_gar_repo}/${var.angular_image_name}:latest"
   service_account = google_service_account.cloudrun_runtime.email
-  domain_name     = replace(var.front_url, "https://", "")
+  domain_name     = local.front_domain
   env_vars = [
     { name = "NGINX_ENVSUBST_OUTPUT_DIR", value = "/etc/nginx" },
     { name = "NG_APP_AUTH_API_URL", value = "https://${local.auth_domain}" },

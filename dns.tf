@@ -56,16 +56,6 @@ resource "google_dns_record_set" "root_aaaa" {
   project = var.project_id
 }
 
-# www CNAME
-resource "google_dns_record_set" "www" {
-  name         = "www.project-tanuki.net."
-  managed_zone = google_dns_managed_zone.main.name
-  type         = "CNAME"
-  ttl          = 14400
-  rrdatas      = ["ghs.googlehosted.com."]
-  project      = var.project_id
-}
-
 # dev CNAME (your existing one)
 resource "google_dns_record_set" "dev" {
   name         = "dev.project-tanuki.net."
@@ -82,6 +72,7 @@ resource "google_dns_record_set" "dev" {
 
 locals {
   service_subdomains = {
+    front   = local.front_domain
     auth    = local.auth_domain
     profile = local.profile_domain
     socket  = local.socket_domain
