@@ -111,23 +111,6 @@ variable "socket_image_name" {
   type        = string
 }
 
-variable "socket_domain" {
-  description = "Domain name for Socket service"
-  type        = string
-  default     = null
-}
-
-variable "auth_domain" {
-  description = "Domain name for Auth service"
-  type        = string
-  default     = null
-}
-
-variable "profile_domain" {
-  description = "Domain name for Profile service"
-  type        = string
-  default     = null
-}
 
 
 variable "front_url" {

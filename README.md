@@ -39,15 +39,40 @@ To deploy this project to a brand-new Google Cloud project, you must follow this
 ### 1. The Bootstrap (Day 0)
 Initially, you must run Terraform using your own identity (your Google account) which has **Project Owner** permissions.
 
+**Pre-requisite: Enable Required APIs**
+Before running Terraform, you must manually enable the following APIs in your GCP project:
+- **Cloud DNS API** (`dns.googleapis.com`): Required for managing DNS zones and records.
+- **Cloud Run Admin API** (`run.googleapis.com`): Required for service deployments and domain mappings.
+
+You can enable them via the GCP Console or by running:
+```bash
+gcloud services enable dns.googleapis.com run.googleapis.com
+```
+
+**Pre-requisite: Domain Ownership Verification**
+Google Cloud Run requires you to prove ownership of any domain you wish to map to a service.
+1.  Go to the [Google Search Console (Webmaster Central)](https://www.google.com/webmasters/verification/home).
+2.  Add a **Domain property** for `project-tanuki.net`.
+3.  Follow the verification steps (usually adding a TXT record to your current DNS provider, e.g., Squarespace).
+4.  **Crucial Step**: Once verified, you must also add the **Terraform Management** service account (`terraform-mgmt@tanuki-dev.iam.gserviceaccount.com` or similar) as a **Verified Owner** in the Search Console settings for that domain.
+5.  **Important**: You must verify the domain and add the service account as an owner *before* Terraform can successfully create the `google_cloud_run_domain_mapping` resources.
+
 **Command:**
 ```bash
 terraform apply \
   -target="google_service_account.terraform_mgmt" \
   -target="google_project_iam_member.terraform_mgmt_roles" \
+  -target="google_service_account.cloudrun_runtime" \
+  -target="google_project_iam_member.runtime_logging" \
+  -target="google_project_iam_member.runtime_monitoring" \
+  -target="google_project_iam_member.runtime_secret_accessor" \
+  -target="google_project_iam_member.runtime_gar_writer" \
+  -target="google_project_iam_member.runtime_run_developer" \
+  -target="google_service_account_iam_member.runtime_act_as_self" \
   -var-file="environments/dev.tfvars"
 ```
 
-*   **Reasoning**: Terraform needs a "Management" identity (`terraform-mgmt`) to manage the project. However, it cannot use that identity to create itself. You use your personal account once to "spawn" the automation identity.
+*   **Reasoning**: Terraform needs a "Management" identity (`terraform-mgmt`) to manage the project, and we also initialize the `cloudrun-runtime` identity and its associated permissions. However, it cannot use that identity to create itself. You use your personal account once to "spawn" these core automation and runtime identities.
 
 ---
 
@@ -68,7 +93,7 @@ terraform apply \
 ---
 
 ### 3. Push Docker Images (User Action)
-Use your CI/CD pipeline or local Docker to build and push at least one image for each service (Auth, Profile, Angular, and Socket) to the new repositories.
+Use your CI/CD pipeline or local Docker to build and push at least one image for each service (`auth-service`, `profile-service`, `angular-frontend`, and `socket-server`) to the new repositories.
 
 #### Choosing Your Strategy
 Depending on your project's maturity, choose one of these common strategies:
@@ -82,7 +107,7 @@ Depending on your project's maturity, choose one of these common strategies:
 
 ```bash
 # Set your variables
-REGION="asia-northeast1"
+REGION="europe-west1"
 PROJECT="tanuki-dev"
 BACK_REPO="tanuki-back-repo"
 
@@ -138,6 +163,25 @@ terraform apply -var-file="environments/dev.tfvars"
 ```
 
 *   **Reasoning**: Now that all foundations (APIs, Identity, and Images) are in place, Terraform can safely orchestrate the deployment of all services and their IAM permissions in one go.
+
+---
+
+### 5. Manual Setup: IAP Brand and OAuth Clients (Required)
+If your project does **not** belong to a Google Cloud Organization, you cannot create an Internal Brand programmatically (a limitation of the Google Brands API). Terraform's `google_iap_brand` will fail if your project is not organization-backed.
+
+**Important**: Since this project uses IAP for authentication, you must manually configure the OAuth consent screen (Brand) and the OAuth clients.
+
+1.  **Create the Brand (OAuth Consent Screen)**:
+    - Go to **APIs & Services > OAuth consent screen** in the GCP Console.
+    - Choose **External** (since Internal requires an Organization).
+    - Fill in the **App name**, **User support email**, and **Developer contact info**.
+    - Click **Save and Continue** (you can skip Scopes and Test Users for now).
+
+2.  **Create OAuth Clients**:
+    - Go to **APIs & Services > Credentials**.
+    - Click **Create Credentials > OAuth client ID**.
+    - Select **Web application** for your frontend or backend services as needed.
+    - Add the authorized redirect URIs (e.g., your Cloud Run service URLs).
 
 ---
 
@@ -215,8 +259,19 @@ Example step in GitHub Actions:
   env:
     TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
     TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+    TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     # Terraform automatically maps TF_VAR_name to the variable "name"
 ```
+
+## Google OAuth Configuration
+
+This project uses Google OAuth for authentication. Due to the way Google handles Redirect URIs, we use a relative path in the Terraform variables and dynamically construct the full URL.
+
+1.  **Google Client ID**: Obtain this from the GCP Console.
+2.  **Google Redirect URI**: Set this to the relative path `/login/oauth2/code/google` in your `.tfvars` file.
+3.  **Auth Domain**: The base domain where your Auth service is hosted (e.g., `auth.project-tanuki.com`).
+
+Terraform will combine these to pass the correct full Redirect URI to the application.
 
 ## Cost-Effective Configuration
 

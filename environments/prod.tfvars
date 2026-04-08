@@ -4,7 +4,7 @@ environment               = "prod"
 gar_location              = "asia-northeast1"
 
 #CORS
-app_cors_allowed_origins = "https://project-tanuki.net;https://www.project-tanuki.net"
+app_cors_allowed_origins = "https://project-tanuki.net;https://www.project-tanuki.net;https://auth.project-tanuki.net;https://profile.project-tanuki.net;https://socket.project-tanuki.net"
 
 # back
 gar_repository         = "tanuki-back-repo"
