@@ -71,11 +71,15 @@ resource "google_dns_record_set" "dev" {
 # -----------------------------------------------
 
 locals {
+  # We only include subdomains that are NOT the root domain (Apex).
+  # The root domain (project-tanuki.net) cannot have a CNAME and uses the A/AAAA records defined above.
   service_subdomains = {
-    front   = local.front_domain
-    auth    = local.auth_domain
-    profile = local.profile_domain
-    socket  = local.socket_domain
+    for k, v in {
+      front   = local.front_domain
+      auth    = local.auth_domain
+      profile = local.profile_domain
+      socket  = local.socket_domain
+    } : k => v if v != local.base_domain
   }
 }
 
