@@ -111,9 +111,12 @@ variable "socket_image_name" {
   type        = string
 }
 
-
-
 variable "front_url" {
   description = "url for the tanuki front-end"
+  type        = string
+}
+
+variable "app_storage_bucket_name" {
+  description = "name of the app storage bucket name"
   type        = string
 }
