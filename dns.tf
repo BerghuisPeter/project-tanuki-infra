@@ -18,15 +18,20 @@ resource "google_dns_managed_zone" "main" {
   count = local.is_prod ? 1 : 0
 }
 
-# Use a data source to reference the zone when we are not in the production project
+# Use a data source to reference the zone ONLY when in prod
+# to avoid 403 Forbidden errors in dev when dev service account doesn't have access to prod project DNS.
+# In dev, we don't manage DNS records in the prod project.
+# NOTE: We use data source even in prod to ensure the resource is available for records if needed, 
+# but usually google_dns_managed_zone.main[0] is preferred when count=1.
 data "google_dns_managed_zone" "main" {
+  count   = local.is_prod ? 1 : 0
   name    = "project-tanuki-zone"
   project = local.dns_project_id
 }
 
 locals {
-  # Helper to get the zone name regardless of whether it was created or referenced
-  zone_name = local.is_prod ? google_dns_managed_zone.main[0].name : data.google_dns_managed_zone.main.name
+  # Helper to get the zone name (only used in prod)
+  zone_name = local.is_prod ? google_dns_managed_zone.main[0].name : ""
 }
 
 # -----------------------------------------------
@@ -100,7 +105,7 @@ locals {
 }
 
 resource "google_dns_record_set" "services" {
-  for_each     = local.service_subdomains
+  for_each     = local.is_prod ? local.service_subdomains : {}
   name         = "${each.value}."
   managed_zone = local.zone_name
   type         = "CNAME"
@@ -114,5 +119,5 @@ resource "google_dns_record_set" "services" {
 # -----------------------------------------------
 output "nameservers" {
   description = "Set these as your nameservers in Squarespace"
-  value       = local.is_prod ? google_dns_managed_zone.main[0].name_servers : data.google_dns_managed_zone.main.name_servers
+  value       = local.is_prod ? google_dns_managed_zone.main[0].name_servers : []
 }
