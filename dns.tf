@@ -87,6 +87,25 @@ resource "google_dns_record_set" "dev" {
   project      = local.dns_project_id
 }
 
+# dev service subdomains
+locals {
+  dev_service_subdomains = {
+    auth    = "dev.auth.project-tanuki.net"
+    profile = "dev.profile.project-tanuki.net"
+    socket  = "dev.socket.project-tanuki.net"
+  }
+}
+
+resource "google_dns_record_set" "dev_services" {
+  for_each     = local.is_prod ? local.dev_service_subdomains : {}
+  name         = "${each.value}."
+  managed_zone = local.zone_name
+  type         = "CNAME"
+  ttl          = 300
+  rrdatas      = ["ghs.googlehosted.com."]
+  project      = local.dns_project_id
+}
+
 # -----------------------------------------------
 # Subdomains for each Cloud Run service
 # -----------------------------------------------
