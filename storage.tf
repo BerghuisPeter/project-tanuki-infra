@@ -2,7 +2,7 @@ resource "google_storage_bucket" "assets" {
   name                        = var.app_storage_bucket_name
   location                    = var.region
   uniform_bucket_level_access = true
-  force_destroy = var.environment == "dev"
+  force_destroy               = var.environment == "dev"
 
   cors {
     origin = concat(
