@@ -4,11 +4,9 @@ on:
   pull_request:
     branches:
       - master
-      - develop
   push:
     branches:
       - master
-      - develop
 
 permissions:
   contents: read
@@ -18,15 +16,10 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    environment: ${{ (github.event_name == 'pull_request' && github.base_ref == 'master') && 'prod' || (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
+    environment: 'prod'
     
-    # Map the environment based on the branch/event
-    # PRs to master = prod environment (to test)
-    # Push to master = prod environment (to deploy)
-    # PRs to develop = dev environment (to test)
-    # Push to develop = dev environment (to deploy)
     env:
-      ENV_NAME: ${{ (github.event_name == 'pull_request' && github.base_ref == 'master') && 'prod' || (github.event_name == 'push' && github.ref == 'refs/heads/master') && 'prod' || 'dev' }}
+      ENV_NAME: 'prod'
 
     steps:
       - name: Checkout
@@ -86,5 +79,5 @@ jobs:
         run: exit 1
 
       - name: Terraform Apply
-        if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.event_name == 'push' && steps.plan.outputs.exitcode == '2'
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push' && steps.plan.outputs.exitcode == '2'
         run: terraform apply -auto-approve -var-file="environments/${{ env.ENV_NAME }}.tfvars"
