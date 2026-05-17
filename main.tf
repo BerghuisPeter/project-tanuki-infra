@@ -92,5 +92,7 @@ module "profile_service" {
   env_vars = concat(local.common_back_env, [
     { name = "GCP_STORAGE_BUCKET_NAME", value = var.app_storage_bucket_name }
   ])
-  secret_env_vars = local.common_secret_env
+  secret_env_vars = concat(local.common_secret_env, [
+    { name = "GCP_STORAGE_CREDENTIALS_JSON", secret = "GCP_STORAGE_CREDENTIALS_JSON", version = "latest" }
+  ])
 }

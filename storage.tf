@@ -25,3 +25,9 @@ resource "google_storage_bucket_iam_member" "runtime_bucket_admin" {
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.cloudrun_runtime.email}"
 }
+
+resource "google_storage_bucket_iam_member" "public_read" {
+  bucket = google_storage_bucket.assets.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
