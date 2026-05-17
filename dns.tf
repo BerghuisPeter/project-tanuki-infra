@@ -12,7 +12,7 @@ resource "google_dns_managed_zone" "main" {
   name        = "project-tanuki-zone"
   dns_name    = "project-tanuki.net." # trailing dot is required
   description = "Main DNS zone for project-tanuki.net"
-  project     = local.is_prod ? local.dns_project_id : var.project_id
+  project     = local.dns_project_id
 
   # Only create the zone if we are in the production environment
   count = local.is_prod ? 1 : 0
@@ -26,7 +26,7 @@ resource "google_dns_managed_zone" "main" {
 data "google_dns_managed_zone" "main" {
   count   = local.is_prod ? 1 : 0
   name    = "project-tanuki-zone"
-  project = local.is_prod ? local.dns_project_id : var.project_id
+  project = local.dns_project_id
 }
 
 locals {
@@ -46,7 +46,7 @@ resource "google_dns_record_set" "site_verification" {
   type         = "TXT"
   ttl          = 300
   rrdatas      = ["\"google-site-verification=lneFjEz_uaqYkZOJgBAysiSrNXjCFWU1dOgrjIYzR4M\""]
-  project      = local.is_prod ? local.dns_project_id : var.project_id
+  project      = local.dns_project_id
 }
 
 # Root A records (IPv4)
@@ -62,7 +62,7 @@ resource "google_dns_record_set" "root_a" {
     "216.239.36.21",
     "216.239.38.21",
   ]
-  project = local.is_prod ? local.dns_project_id : var.project_id
+  project = local.dns_project_id
 }
 
 # Root AAAA records (IPv6)
@@ -78,7 +78,7 @@ resource "google_dns_record_set" "root_aaaa" {
     "2001:4860:4802:36::15",
     "2001:4860:4802:38::15",
   ]
-  project = local.is_prod ? local.dns_project_id : var.project_id
+  project = local.dns_project_id
 }
 
 # dev CNAME (your existing one)
@@ -89,7 +89,7 @@ resource "google_dns_record_set" "dev" {
   type         = "CNAME"
   ttl          = 14400
   rrdatas      = ["ghs.googlehosted.com."]
-  project      = local.is_prod ? local.dns_project_id : var.project_id
+  project      = local.dns_project_id
 }
 
 # -----------------------------------------------
@@ -111,7 +111,7 @@ resource "google_dns_record_set" "services" {
   type         = "CNAME"
   ttl          = 300
   rrdatas      = ["ghs.googlehosted.com."]
-  project      = local.is_prod ? local.dns_project_id : var.project_id
+  project      = local.dns_project_id
 }
 
 # -----------------------------------------------
