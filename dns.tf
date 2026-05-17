@@ -78,7 +78,6 @@ resource "google_dns_record_set" "root_aaaa" {
 
 # dev CNAME (your existing one)
 resource "google_dns_record_set" "dev" {
-  count        = local.is_prod ? 1 : 0
   name         = "dev.project-tanuki.net."
   managed_zone = local.zone_name
   type         = "CNAME"
