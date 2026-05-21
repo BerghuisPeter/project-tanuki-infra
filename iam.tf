@@ -75,3 +75,9 @@ resource "google_project_iam_member" "terraform_mgmt_roles" {
   role     = each.value
   member   = "serviceAccount:${google_service_account.terraform_mgmt.email}"
 }
+
+resource "google_project_iam_member" "backend_signer" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.cloudrun_runtime.email}"
+}

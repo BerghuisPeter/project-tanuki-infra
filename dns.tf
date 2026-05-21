@@ -78,11 +78,29 @@ resource "google_dns_record_set" "root_aaaa" {
 
 # dev CNAME (your existing one)
 resource "google_dns_record_set" "dev" {
-  count        = local.is_prod ? 1 : 0
   name         = "dev.project-tanuki.net."
   managed_zone = local.zone_name
   type         = "CNAME"
   ttl          = 14400
+  rrdatas      = ["ghs.googlehosted.com."]
+  project      = local.dns_project_id
+}
+
+# dev service subdomains
+locals {
+  dev_service_subdomains = {
+    auth    = "dev.auth.project-tanuki.net"
+    profile = "dev.profile.project-tanuki.net"
+    socket  = "dev.socket.project-tanuki.net"
+  }
+}
+
+resource "google_dns_record_set" "dev_services" {
+  for_each     = local.is_prod ? local.dev_service_subdomains : {}
+  name         = "${each.value}."
+  managed_zone = local.zone_name
+  type         = "CNAME"
+  ttl          = 300
   rrdatas      = ["ghs.googlehosted.com."]
   project      = local.dns_project_id
 }

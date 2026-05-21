@@ -85,6 +85,10 @@ module "profile_service" {
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/profile-service:latest"
   service_account = google_service_account.cloudrun_runtime.email
   domain_name     = local.profile_domain
-  env_vars        = local.common_back_env
-  secret_env_vars = local.common_secret_env
+  env_vars = concat(local.common_back_env, [
+    { name = "GCP_STORAGE_BUCKET_NAME", value = var.app_storage_bucket_name }
+  ])
+  secret_env_vars = concat(local.common_secret_env, [
+    { name = "GCP_STORAGE_CREDENTIALS_JSON", secret = "GCP_STORAGE_CREDENTIALS_JSON", version = "latest" }
+  ])
 }
