@@ -96,3 +96,18 @@ module "profile_service" {
     { name = "GCP_STORAGE_CREDENTIALS_JSON", secret = "GCP_STORAGE_CREDENTIALS_JSON", version = "latest" }
   ])
 }
+
+module "liquibase_migration" {
+  source          = "./modules/cloud_run_job"
+  job_name        = "liquibase-migration-${var.environment}"
+  region          = var.region
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
+  service_account = google_service_account.cloudrun_runtime.email
+  env_vars = [
+    { name = "LIQUIBASE_COMMAND_USERNAME", value = var.db_username }
+  ]
+  secret_env_vars = [
+    { name = "LIQUIBASE_COMMAND_URL", secret = "db_url", version = "latest" },
+    { name = "LIQUIBASE_COMMAND_PASSWORD", secret = "db_password", version = "latest" }
+  ]
+}
