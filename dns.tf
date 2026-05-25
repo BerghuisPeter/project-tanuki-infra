@@ -78,6 +78,7 @@ resource "google_dns_record_set" "root_aaaa" {
 
 # dev CNAME (your existing one)
 resource "google_dns_record_set" "dev" {
+  count        = local.is_prod ? 1 : 0
   name         = "dev.project-tanuki.net."
   managed_zone = local.zone_name
   type         = "CNAME"
@@ -92,6 +93,7 @@ locals {
     auth    = "dev.auth.project-tanuki.net"
     profile = "dev.profile.project-tanuki.net"
     socket  = "dev.socket.project-tanuki.net"
+    goshuin = "dev.goshuin.project-tanuki.net"
   }
 }
 
@@ -110,20 +112,16 @@ resource "google_dns_record_set" "dev_services" {
 # -----------------------------------------------
 
 locals {
-  # We only include subdomains that are NOT the root domain (Apex).
-  # The root domain (project-tanuki.net) cannot have a CNAME and uses the A/AAAA records defined above.
   service_subdomains = {
-    for k, v in {
-      front   = local.front_domain
-      auth    = local.auth_domain
-      profile = local.profile_domain
-      socket  = local.socket_domain
-    } : k => v if v != local.base_domain
+    auth    = local.auth_domain
+    profile = local.profile_domain
+    socket  = local.socket_domain
+    goshuin = local.goshuin_domain
   }
 }
 
 resource "google_dns_record_set" "services" {
-  for_each     = local.service_subdomains
+  for_each     = local.is_prod ? local.service_subdomains : {}
   name         = "${each.value}."
   managed_zone = local.zone_name
   type         = "CNAME"
