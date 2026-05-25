@@ -18,6 +18,7 @@ locals {
   auth_domain    = "${local.service_domain_suffix}auth.${local.base_domain}"
   profile_domain = "${local.service_domain_suffix}profile.${local.base_domain}"
   socket_domain  = "${local.service_domain_suffix}socket.${local.base_domain}"
+  goshuin_domain = "${local.service_domain_suffix}goshuin.${local.base_domain}"
 
   common_back_env = [
     { name = "SPRING_PROFILES_ACTIVE", value = var.environment },
