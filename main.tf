@@ -47,6 +47,7 @@ module "angular_frontend" {
     { name = "NG_APP_AUTH_API_URL", value = "https://${local.auth_domain}" },
     { name = "NG_APP_PROFILE_API_URL", value = "https://${local.profile_domain}" },
     { name = "NG_APP_SOCKET_SERVER_URL", value = "https://${local.socket_domain}" },
+    { name = "NG_APP_GOSHUIN_API_URL", value = "https://${local.goshuin_domain}" },
   ]
 }
 
@@ -91,6 +92,17 @@ module "profile_service" {
   secret_env_vars = concat(local.common_secret_env, [
     { name = "GCP_STORAGE_CREDENTIALS_JSON", secret = "GCP_STORAGE_CREDENTIALS_JSON", version = "latest" }
   ])
+}
+
+module "goshuin_service" {
+  source          = "./modules/cloud_run"
+  service_name    = "tanuki-back-goshuin-service"
+  region          = var.region
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/goshuin-service:latest"
+  service_account = google_service_account.cloudrun_runtime.email
+  domain_name     = local.goshuin_domain
+  env_vars        = local.common_back_env
+  secret_env_vars = local.common_secret_env
 }
 
 module "liquibase_migration" {

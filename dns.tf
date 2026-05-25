@@ -92,6 +92,7 @@ locals {
     auth    = "dev.auth.project-tanuki.net"
     profile = "dev.profile.project-tanuki.net"
     socket  = "dev.socket.project-tanuki.net"
+    goshuin = "dev.goshuin.project-tanuki.net"
   }
 }
 
@@ -110,15 +111,11 @@ resource "google_dns_record_set" "dev_services" {
 # -----------------------------------------------
 
 locals {
-  # We only include subdomains that are NOT the root domain (Apex).
-  # The root domain (project-tanuki.net) cannot have a CNAME and uses the A/AAAA records defined above.
   service_subdomains = {
-    for k, v in {
-      front   = local.front_domain
-      auth    = local.auth_domain
-      profile = local.profile_domain
-      socket  = local.socket_domain
-    } : k => v if v != local.base_domain
+    auth    = local.auth_domain
+    profile = local.profile_domain
+    socket  = local.socket_domain
+    goshuin = local.goshuin_domain
   }
 }
 
