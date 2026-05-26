@@ -26,6 +26,9 @@ locals {
     { name = "JWT_EXPIRATION", value = var.jwt_expiration },
     { name = "JWT_REFRESH_EXPIRATION", value = var.jwt_refresh_expiration },
     { name = "APP_CORS_ALLOWED_ORIGINS", value = local.dynamic_cors_list },
+    { name = "PROFILE_SERVICE_URL", value = local.profile_domain },
+    { name = "AUTH_SERVICE_URL", value = local.auth_domain },
+    { name = "GOSHUIN_SERVICE_URL", value = local.goshuin_domain },
   ]
 
   common_secret_env = [
@@ -102,7 +105,9 @@ module "goshuin_service" {
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/goshuin-service:latest"
   service_account = google_service_account.cloudrun_runtime.email
   domain_name     = local.goshuin_domain
-  env_vars        = local.common_back_env
+  env_vars = concat(local.common_back_env, [
+    { name = "GCP_STORAGE_BUCKET_NAME", value = var.app_storage_bucket_name }
+  ])
   secret_env_vars = local.common_secret_env
 }
 
