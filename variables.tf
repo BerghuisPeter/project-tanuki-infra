@@ -120,3 +120,9 @@ variable "app_storage_bucket_name" {
   description = "name of the app storage bucket name"
   type        = string
 }
+
+variable "tile_server_image" {
+  description = "The image for the tile server"
+  type        = string
+  default     = "maptiler/tileserver-gl:latest"
+}
