@@ -120,26 +120,6 @@ module "tile_server" {
   image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/tanuki-tile-server:latest"
   service_account = google_service_account.cloudrun_runtime.email
   domain_name     = local.tiles_domain
-  env_vars = [
-    {
-      name  = "TILESERVER_GL_CONFIG_JSON"
-      value = jsonencode({
-        options = {
-          paths = {
-            root    = "/usr/src/app/node_modules/tileserver-gl-styles"
-            fonts   = "fonts"
-            styles  = "styles"
-            mbtiles = "/data"
-          }
-        }
-        data = {
-          openmaptiles = {
-            mbtiles = "japan.mbtiles"
-          }
-        }
-      })
-    }
-  ]
 }
 
 module "liquibase_migration" {
