@@ -39,6 +39,18 @@ variable "domain_name" {
   default     = null
 }
 
+variable "container_command" {
+  description = "The command to run in the container"
+  type        = list(string)
+  default     = null
+}
+
+variable "container_args" {
+  description = "The arguments to pass to the container command"
+  type        = list(string)
+  default     = null
+}
+
 resource "google_cloud_run_v2_service" "default" {
   name     = var.service_name
   location = var.region
@@ -47,7 +59,9 @@ resource "google_cloud_run_v2_service" "default" {
   template {
     service_account = var.service_account
     containers {
-      image = var.image
+      image   = var.image
+      command = var.container_command
+      args    = var.container_args
 
       dynamic "env" {
         for_each = var.env_vars

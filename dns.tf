@@ -94,6 +94,7 @@ locals {
     profile = "dev.profile.project-tanuki.net"
     socket  = "dev.socket.project-tanuki.net"
     goshuin = "dev.goshuin.project-tanuki.net"
+    tiles   = "dev.tiles.project-tanuki.net"
   }
 }
 
@@ -117,6 +118,7 @@ locals {
     profile = local.profile_domain
     socket  = local.socket_domain
     goshuin = local.goshuin_domain
+    tiles   = local.tiles_domain
   }
 }
 

@@ -19,6 +19,7 @@ locals {
   profile_domain = "${local.service_domain_suffix}profile.${local.base_domain}"
   socket_domain  = "${local.service_domain_suffix}socket.${local.base_domain}"
   goshuin_domain = "${local.service_domain_suffix}goshuin.${local.base_domain}"
+  tiles_domain   = "${local.service_domain_suffix}tiles.${local.base_domain}"
 
   common_back_env = [
     { name = "SPRING_PROFILES_ACTIVE", value = var.environment },
@@ -52,6 +53,7 @@ module "angular_frontend" {
     { name = "NG_APP_PROFILE_API_URL", value = "https://${local.profile_domain}" },
     { name = "NG_APP_SOCKET_SERVER_URL", value = "https://${local.socket_domain}" },
     { name = "NG_APP_GOSHUIN_API_URL", value = "https://${local.goshuin_domain}" },
+    { name = "NG_APP_TILE_SERVER_URL", value = "https://${local.tiles_domain}" },
   ]
 }
 
@@ -109,6 +111,15 @@ module "goshuin_service" {
     { name = "GCP_STORAGE_BUCKET_NAME", value = var.app_storage_bucket_name }
   ])
   secret_env_vars = local.common_secret_env
+}
+
+module "tile_server" {
+  source          = "./modules/cloud_run"
+  service_name    = "tanuki-tile-server"
+  region          = var.region
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/tanuki-tile-server:latest"
+  service_account = google_service_account.cloudrun_runtime.email
+  domain_name     = local.tiles_domain
 }
 
 module "liquibase_migration" {
