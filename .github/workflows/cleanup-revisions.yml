@@ -4,10 +4,20 @@ on:
   schedule:
     - cron: '0 3 1 * *' # Runs at 03:00 on the 1st of every month
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment to clean up'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - dev
+          - prod
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'prod' }}
     steps:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
