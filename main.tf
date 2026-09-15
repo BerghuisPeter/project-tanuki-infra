@@ -27,9 +27,9 @@ locals {
     { name = "JWT_EXPIRATION", value = var.jwt_expiration },
     { name = "JWT_REFRESH_EXPIRATION", value = var.jwt_refresh_expiration },
     { name = "APP_CORS_ALLOWED_ORIGINS", value = local.dynamic_cors_list },
-    { name = "PROFILE_SERVICE_URL", value = local.profile_domain },
-    { name = "AUTH_SERVICE_URL", value = local.auth_domain },
-    { name = "GOSHUIN_SERVICE_URL", value = local.goshuin_domain },
+    { name = "PROFILE_SERVICE_URL", value = "https://${local.profile_domain}" },
+    { name = "AUTH_SERVICE_URL", value = "https://${local.auth_domain}" },
+    { name = "GOSHUIN_SERVICE_URL", value = "https://${local.goshuin_domain}" },
   ]
 
   common_secret_env = [

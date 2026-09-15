@@ -5,7 +5,7 @@ gar_location              = "asia-northeast1"
 app_storage_bucket_name   = "tanuki-dev-assets"
 
 #CORS
-app_cors_allowed_origins = "https://dev.project-tanuki.net;https://dev.auth.project-tanuki.net;https://dev.profile.project-tanuki.net;https://dev.socket.project-tanuki.net"
+app_cors_allowed_origins = "http://localhost:4200;https://dev.project-tanuki.net;https://dev.auth.project-tanuki.net;https://dev.profile.project-tanuki.net;https://dev.socket.project-tanuki.net"
 
 # back
 gar_repository         = "tanuki-back-repo"
