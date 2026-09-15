@@ -60,7 +60,7 @@ resource "google_service_account" "terraform_mgmt" {
 locals {
   terraform_mgmt_roles = [
     "roles/run.admin",
-    "roles/artifactregistry.repoAdmin",
+    "roles/artifactregistry.admin",
     "roles/iam.serviceAccountUser",
     "roles/iam.securityAdmin",
     "roles/storage.admin",
