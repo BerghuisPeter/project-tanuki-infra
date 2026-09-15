@@ -8,34 +8,26 @@ on:
       environment:
         description: 'Target environment to clean up'
         required: true
-        default: 'prod'
+        default: 'all'
         type: choice
         options:
+          - all
           - dev
           - prod
 
 jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'prod' }}
-    steps:
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+  cleanup-dev:
+    name: Dev
+    if: github.event_name == 'schedule' || github.event.inputs.environment == 'all' || github.event.inputs.environment == 'dev'
+    uses: ./.github/workflows/cleanup-env.yml
+    with:
+      environment: dev
+    secrets: inherit
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Delete Old Revisions
-        run: |
-          REGION=${{ vars.GCP_REGION }}
-          CUTOFF_DATE=$(date -u -d "30 days ago" +"%Y-%m-%dT%H:%M:%SZ")
-
-          for SERVICE in $(gcloud run services list --region="$REGION" --format="value(metadata.name)"); do
-            echo "Processing service: $SERVICE"
-            for REV in $(gcloud run revisions list --service="$SERVICE" --region="$REGION" --filter="metadata.creationTimestamp < '$CUTOFF_DATE' AND active != true" --format="value(metadata.name)"); do
-              echo "Deleting $REV"
-              gcloud run revisions delete "$REV" --region="$REGION" --quiet || true
-            done
-          done
+  cleanup-prod:
+    name: Prod
+    if: github.event_name == 'schedule' || github.event.inputs.environment == 'all' || github.event.inputs.environment == 'prod'
+    uses: ./.github/workflows/cleanup-env.yml
+    with:
+      environment: prod
+    secrets: inherit
