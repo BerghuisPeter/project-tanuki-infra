@@ -61,7 +61,8 @@ project-tanuki-infra/
 │       └── main.tf
 └── .github/workflows/
     ├── terraform.yml                  # PR plan checks + Master branch auto-apply
-    └── cleanup-revisions.yml          # Monthly cron cleanup of inactive Cloud Run revisions
+    ├── cleanup-revisions.yml          # Monthly cron and manual cleanup orchestrator
+    └── cleanup-env.yml                # Reusable workflow for Cloud Run revision cleanup per environment
 ```
 
 ---
