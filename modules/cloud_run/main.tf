@@ -85,6 +85,15 @@ resource "google_cloud_run_v2_service" "default" {
       }
     }
   }
+  # noinspection HCLUnknownDeclaration
+  lifecycle {
+    ignore_changes = [
+      client,
+      client_version,
+      template[0].labels,
+      template[0].containers[0].image,
+    ]
+  }
 }
 
 # Allow public access to the service

@@ -67,9 +67,15 @@ resource "google_cloud_run_v2_job" "default" {
     }
   }
 
+  # noinspection HCLUnknownDeclaration
   lifecycle {
     ignore_changes = [
       launch_stage,
+      client,
+      client_version,
+      labels,
+      template[0].labels,
+      template[0].template[0].containers[0].image,
     ]
   }
 }

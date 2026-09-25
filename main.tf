@@ -143,7 +143,7 @@ module "liquibase_migration" {
   source          = "./modules/cloud_run_job"
   job_name        = "liquibase-migration-${var.environment}"
   region          = var.region
-  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/auth-service:latest"
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/liquibase-migration:latest"
   service_account = google_service_account.cloudrun_runtime.email
   env_vars = [
     { name = "LIQUIBASE_COMMAND_USERNAME", value = var.db_username }
