@@ -120,3 +120,9 @@ variable "app_storage_bucket_name" {
   description = "name of the app storage bucket name"
   type        = string
 }
+
+variable "enrichment_topic_name" {
+  description = "Name of the Pub/Sub topic for enrichment requests"
+  type        = string
+  default     = "enrichment-requests"
+}

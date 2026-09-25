@@ -108,9 +108,26 @@ module "goshuin_service" {
   service_account = google_service_account.cloudrun_runtime.email
   domain_name     = local.goshuin_domain
   env_vars = concat(local.common_back_env, [
-    { name = "GCP_STORAGE_BUCKET_NAME", value = var.app_storage_bucket_name }
+    { name = "GCP_STORAGE_BUCKET_NAME", value = var.app_storage_bucket_name },
+    { name = "GCP_PUBSUB_TOPIC_NAME", value = google_pubsub_topic.enrichment_requests.name }
   ])
   secret_env_vars = local.common_secret_env
+}
+
+module "enrichment_worker" {
+  source          = "./modules/cloud_run"
+  service_name    = "tanuki-enrichment-worker"
+  region          = var.region
+  image           = "${var.gar_location}-docker.pkg.dev/${var.project_id}/${var.gar_repository}/enrichment-worker:latest"
+  service_account = google_service_account.cloudrun_runtime.email
+  env_vars = [
+    { name = "ENVIRONMENT", value = var.environment },
+    { name = "GCP_PROJECT_ID", value = var.project_id }
+  ]
+  secret_env_vars = [
+    { name = "GOOGLE_MAPS_API_KEY", secret = "google_maps_api_key", version = "latest" },
+    { name = "GEMINI_API_KEY", secret = "gemini_api_key", version = "latest" }
+  ]
 }
 
 module "tile_server" {

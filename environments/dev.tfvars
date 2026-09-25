@@ -1,8 +1,8 @@
-project_id                = "tanuki-dev"
-region                    = "asia-northeast1"
-environment               = "dev"
-gar_location              = "asia-northeast1"
-app_storage_bucket_name   = "tanuki-dev-assets"
+project_id              = "tanuki-dev"
+region                  = "asia-northeast1"
+environment             = "dev"
+gar_location            = "asia-northeast1"
+app_storage_bucket_name = "tanuki-dev-assets"
 
 #CORS
 app_cors_allowed_origins = "http://localhost:4200;https://dev.project-tanuki.net;https://dev.auth.project-tanuki.net;https://dev.profile.project-tanuki.net;https://dev.socket.project-tanuki.net"
@@ -24,3 +24,6 @@ socket_gar_repo   = "tanuki-socket-repo"
 socket_image_name = "tanuki-socket"
 
 front_url = "https://dev.project-tanuki.net"
+
+# pubsub
+enrichment_topic_name = "enrichment-requests"

@@ -65,7 +65,8 @@ locals {
     "roles/iam.securityAdmin",
     "roles/storage.admin",
     "roles/secretmanager.admin",
-    "roles/dns.admin"
+    "roles/dns.admin",
+    "roles/pubsub.admin"
   ]
 }
 

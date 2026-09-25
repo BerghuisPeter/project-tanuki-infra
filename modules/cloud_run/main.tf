@@ -114,6 +114,18 @@ output "service_url" {
   value = google_cloud_run_v2_service.default.uri
 }
 
+output "service_name" {
+  value = google_cloud_run_v2_service.default.name
+}
+
+output "location" {
+  value = google_cloud_run_v2_service.default.location
+}
+
+output "project" {
+  value = google_cloud_run_v2_service.default.project
+}
+
 output "domain_mapping_status" {
   value = length(google_cloud_run_domain_mapping.default) > 0 ? google_cloud_run_domain_mapping.default[0].status : null
 }
